@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/md5.h>
+#include <openssl/sha.h>
 
 #define STRINGIFY(x) #x
 #define MACRO(x)     STRINGIFY(x)
@@ -32,6 +33,7 @@ int help(char const* argv[]) {
 
     printf("\nHash Types:\n");
     printf("\t100: MD5\n");
+    printf("\t200: SHA256\n");
     printf("\n");
 
     printf("\nString Generator Modes:\n");
@@ -63,11 +65,29 @@ char* MD5SUM(char* string) {
     return buffer;
 }
 
+char* SHA256SUM(char* string) {
+    unsigned char result[SHA256_DIGEST_LENGTH];
+
+    SHA256(string, strlen(string), result);
+
+    const int MAX_BUF = (SHA256_DIGEST_LENGTH*2)+1;
+    char* buffer = malloc(MAX_BUF);
+
+    int length = 0;
+    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+        length += snprintf(buffer+length, MAX_BUF-length, "%02X", result[i]);
+    }
+
+    return buffer;
+}
+
 char* CRACK(char* string, int hashtype) {
     switch (hashtype) {
         case 100:
             //printf("HASH TYPE: MD5\n");
             return MD5SUM(string);
+        case 200:
+            return SHA256SUM(string);
         default:
             printf("UNKNOWN HASH TYPE: %i\n", hashtype);
             exit(2);
@@ -132,6 +152,15 @@ int main(int argc, char const *argv[]) {
         if (strcicmp(argv[i], "-l") == 0) {
             length = atoi(argv[i + 1]);
         }
+        #if 0
+        if (strcicmp(argv[i], "-t") == 0) {
+            int ht = atoi(argv[2]);
+            char* inh = argv[1];
+            char* test = CRACK(inh, ht);
+            printf("%s: %s\n", inh, test);
+            exit(0);
+        }
+        #endif
     }
 
     if (argc < 3) {
