@@ -103,11 +103,8 @@ char* randstring(int length, char* charset, int charsetlen) {
         return (char*)0;
     }
 
-    unsigned int key = 0;
-
-    for (int n = 0;n < length;n++) {
-        key = rand() % charsetlen;
-        randomString[n] = charset[key];
+    for (int n = 0; n < length; n++) {
+        randomString[n] = charset[rand() % charsetlen];
     }
 
     randomString[length] = '\0';
